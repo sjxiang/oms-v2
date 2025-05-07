@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package idl;
+
+import "item.proto";
+
+option go_package = "./pb";
+
+
+message GetItemsRequest {
+    repeated string items_ids = 1;
+}
+
+message GetItemsResponse{
+    repeated Item items = 1;
+}

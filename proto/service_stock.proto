@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package idl;
+
+import "rpc_get_items.proto";
+import "rpc_check_if_items_in_stock.proto";
+
+option go_package = "./pb";
+
+
+// 库存服务
+service StockService {
+    rpc CheckIfItemsInStock (CheckIfItemsInStockRequest) returns (CheckIfItemsInStockResponse);
+    rpc GetItems (GetItemsRequest) returns (GetItemsResponse);
+}

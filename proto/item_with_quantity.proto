@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package idl;
+
+option go_package = "./pb";
+
+
+// 物品(编号 + 数量)
+message ItemWithQuantity {
+    string id = 1;
+    int32 quantity = 2; 
+}

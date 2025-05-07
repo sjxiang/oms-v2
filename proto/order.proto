@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package idl;
+
+import "item.proto";
+
+option go_package = "./pb";
+
+
+message Order {
+    string id = 1;
+    string customer_id = 2;
+    string status = 3;
+    repeated Item items = 4;
+    string payment_link = 5;
+}

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package idl;
+
+import "order.proto";
+import "rpc_create_order.proto";
+import "rpc_get_order.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "./pb";
+
+
+// 订单服务
+service OrderService {
+    rpc CreateOrder (CreateOrderRequest) returns (google.protobuf.Empty);
+    rpc GetOrder (GetOrderRequest) returns (Order);
+    rpc UpdateOrder (Order) returns (google.protobuf.Empty);
+}

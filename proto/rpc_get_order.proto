@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package idl;
+
+option go_package = "./pb";
+
+
+message GetOrderRequest {
+    string order_id = 1;
+    string customer_id = 2;
+}

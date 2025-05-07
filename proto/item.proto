@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+// namespace 随便写, 区别其它 proto 文件
+package idl;
+
+// 仅需 'pb', 代码生成的 go 包名
+option go_package = "./pb";
+
+
+message Item {
+    string id = 1;
+    string name = 2;
+    int32 quantity = 3;
+    string price_id = 4;
+}

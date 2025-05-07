@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package idl;
+
+import "item.proto";
+import "item_with_quantity.proto";
+
+option go_package = "./pb";
+
+
+message CheckIfItemsInStockRequest {
+    repeated ItemWithQuantity items = 1;
+}
+
+// Todo, bool 改为 int32 类型
+message CheckIfItemsInStockResponse {
+    bool in_stock = 1;
+    repeated Item items = 2;
+}

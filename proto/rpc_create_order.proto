@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package idl;
+
+import "item_with_quantity.proto";
+
+option go_package = "./pb";
+
+
+message CreateOrderRequest {
+    string customer_id = 1;
+    repeated ItemWithQuantity items = 2;
+}
