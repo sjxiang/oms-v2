@@ -2,25 +2,24 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	"github.com/sjxiang/oms-v2/common/api"
 	"github.com/sjxiang/oms-v2/common/conf"
 	"github.com/sjxiang/oms-v2/common/pb"
-	"github.com/sjxiang/oms-v2/common/xlog"
 	"github.com/sjxiang/oms-v2/stock/ports"
 	"github.com/sjxiang/oms-v2/stock/service"
 )
 
 func init() {
 	if err := conf.NewViperConfig(); err != nil {
-		xlog.Fatal("初始化配置失败", zap.Error(err))
+		panic(fmt.Errorf("初始化配置失败: %w", err))
 	}
 
-	xlog.Info("config", zap.Any("库存系列", viper.GetStringMap("stock")))
+	fmt.Println("config", viper.GetStringMap("stock"))
 }
 
 
@@ -41,8 +40,8 @@ func main() {
 			pb.RegisterStockServiceServer(server, svc)
 		})
 	case "http":
-		xlog.Fatal("unimplemented")
+		panic("unimplemented")
 	default:
-		xlog.Fatal("unexpected server type")
+		panic("unexpected server type")
 	}
 }

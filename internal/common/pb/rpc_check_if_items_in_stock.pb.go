@@ -65,6 +65,7 @@ func (x *CheckIfItemsInStockRequest) GetItems() []*ItemWithQuantity {
 	return nil
 }
 
+// Todo, bool 改为 int32 类型
 type CheckIfItemsInStockResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache

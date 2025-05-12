@@ -2,28 +2,28 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	"github.com/sjxiang/oms-v2/common/api"
 	"github.com/sjxiang/oms-v2/common/conf"
+	"github.com/sjxiang/oms-v2/common/logger"
 	"github.com/sjxiang/oms-v2/common/pb"
-	"github.com/sjxiang/oms-v2/common/xlog"
 	"github.com/sjxiang/oms-v2/order/ports"
 	"github.com/sjxiang/oms-v2/order/service"
 )
 
 func init() {
 	if err := conf.NewViperConfig(); err != nil {
-		xlog.Fatal("初始化配置失败", zap.Error(err))
+		// 初始化配置失败
+		panic(fmt.Errorf("初始化配置失败: %w", err))
 	}
 
-	xlog.Info("config", zap.Any("订单系列", viper.GetStringMap("order")))
+	fmt.Println("config", viper.GetStringMap("order"))
 }
-
 
 
 func main() {
@@ -32,7 +32,13 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	application := service.NewApplication(ctx)
+	logger, err := logger.NewLogger()
+	if err != nil {
+		panic(err)
+	}
+	defer logger.Sync()
+
+	application := service.NewApplication(ctx, logger)
 
 	// 启动 grpc 服务
 	go api.RunGrpcServer(serverName, func(server *grpc.Server) {

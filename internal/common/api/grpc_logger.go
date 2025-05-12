@@ -9,12 +9,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"github.com/sjxiang/oms-v2/common/xlog"
 )
 
 // 日志拦截器
-func InterceptorLogger() grpc.UnaryServerInterceptor {
+func InterceptorLogger(logger *zap.Logger) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context, 
 		req any, 
@@ -32,10 +30,10 @@ func InterceptorLogger() grpc.UnaryServerInterceptor {
 		}
 	
 		if err != nil {
-			xlog.Error("err", zap.Error(err))
+			logger.Error("err", zap.Error(err))
 		}
 		
-		xlog.Info("received a gRPC request", zapcore.Field{
+		logger.Info("received a gRPC request", zapcore.Field{
 			Key: "protocol",
 			Type: zapcore.StringType,
 			String: "grpc",
