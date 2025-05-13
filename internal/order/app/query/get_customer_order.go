@@ -48,8 +48,8 @@ type queryLoggingWrapper struct {
 	base   GetCustomerOrderHandler
 }
 
-func (q queryLoggingWrapper) Handle(ctx context.Context, cmd GetCustomerOrder) (result *domain.Order, err error) {
-	q.logger.Debug("开始处理查询", 
+func (w queryLoggingWrapper) Handle(ctx context.Context, cmd GetCustomerOrder) (result *domain.Order, err error) {
+	w.logger.Debug("开始处理查询", 
 		zapcore.Field{
 			Key: "query",
 			Type: zapcore.StringType,
@@ -63,11 +63,11 @@ func (q queryLoggingWrapper) Handle(ctx context.Context, cmd GetCustomerOrder) (
 	)
 	defer func() {
 		if err != nil {
-			q.logger.Error("查询处理失败", zap.Error(err))
+			w.logger.Error("查询处理失败", zap.Error(err))
 		} else {
-			q.logger.Info("查询处理完成")
+			w.logger.Info("查询处理完成")
 		}
 	}()
 
-	return q.base.Handle(ctx, cmd)
+	return w.base.Handle(ctx, cmd)
 }

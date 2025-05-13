@@ -18,12 +18,10 @@ type MemoryOrderRepository struct {
 }
 
 func NewMemoryOrderRepository(logger *zap.Logger) *MemoryOrderRepository {
-	s := make([]*domain.Order, 0)
-	s = append(s, defaultOrder...)
-
+	
 	return &MemoryOrderRepository{
 		lock:   &sync.RWMutex{},
-		store:  s,
+		store:  make([]*domain.Order, 0),
 		logger: logger,
 	}
 }
