@@ -15,7 +15,7 @@ type MemoryStockRepository struct {
 }
 
 
-var stub = map[string]*pb.Item{
+var fakeData = map[string]*pb.Item{
 	"商品A": {
 		Id:       "编号 1",
 		Name:     "玉溪",
@@ -35,7 +35,7 @@ func NewMemoryStockRepository() *MemoryStockRepository {
 	
 	return &MemoryStockRepository{
 		lock:  &sync.RWMutex{},
-		store: stub,
+		store: fakeData,
 	}
 }
 

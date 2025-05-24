@@ -8,11 +8,11 @@ curl --location --request POST 'http://127.0.0.1:8282/api/v1/customer/20002/orde
     "customer_id": "20002",
     "items": [
         {
-            "id": "瑞幸咖啡",
+            "id": "编号 1",
             "quantity": 10
         },
         {
-            "id": "库迪咖啡",
+            "id": "编号 2",
             "quantity": 20
         }
     ]

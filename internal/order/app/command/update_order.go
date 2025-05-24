@@ -25,36 +25,41 @@ type UpdateOrderHandler interface {
 }
 
 
-type UpdateOrderHandlerImpl struct {
+func NewUpdateOrderHandler(orderRepo domain.Repository, logger *zap.Logger) UpdateOrderHandler {
+	if orderRepo == nil {
+		panic("order repo is nil")
+	}
+
+	baseHandler := updateOrderHandler{
+		orderRepo: orderRepo,
+	}
+	
+	return ApplyQueryUpdateOrderDecorators(baseHandler, logger)
+}
+
+
+
+type updateOrderHandler struct {
 	orderRepo domain.Repository
 }
 
-func (impl UpdateOrderHandlerImpl) Handle(ctx context.Context, cmd UpdateOrder) (result *UpdateOrder, err error) {
-	err = impl.orderRepo.Update(ctx, cmd.Order, cmd.UpdateFn)
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, nil 
+func (h updateOrderHandler) Handle(ctx context.Context, cmd UpdateOrder) (result *UpdateOrder, err error) {
+	return nil, h.orderRepo.Update(ctx, cmd.Order, cmd.UpdateFn)
 }
 
-func NewUpdateOrderHandler(orderRepo domain.Repository, logger *zap.Logger) UpdateOrderHandler {
-	return applyUpdateOrderCommandWrapper(UpdateOrderHandlerImpl{
-		orderRepo: orderRepo,
-	}, logger)
-}
 
-func applyUpdateOrderCommandWrapper(handler UpdateOrderHandler, logger *zap.Logger) UpdateOrderHandler {
-	return UpdateOrderCommandLoggingWrapper{logger: logger, base: handler}
-}
+// ----------------------------
+// 装饰器 logging
+// ----------------------------
 
-type UpdateOrderCommandLoggingWrapper struct {
+type updateOrderHandlerLogging struct {
 	logger *zap.Logger
 	base   UpdateOrderHandler
 }
 
-func (w UpdateOrderCommandLoggingWrapper) Handle(ctx context.Context, cmd UpdateOrder) (result *UpdateOrder, err error) {
-	w.logger.Debug("开始处理更新订单命令",
+func (h updateOrderHandlerLogging) Handle(ctx context.Context, cmd UpdateOrder) (result *UpdateOrder, err error) {
+
+	h.logger.Debug("开始处理执行", 
 		zapcore.Field{
 			Key: "command",
 			Type: zapcore.StringType,
@@ -63,17 +68,25 @@ func (w UpdateOrderCommandLoggingWrapper) Handle(ctx context.Context, cmd Update
 		zapcore.Field{
 			Key: "command_body",
 			Type: zapcore.StringType,
-			String: fmt.Sprintf("%+v", cmd),
+			String: fmt.Sprintf("%#v", cmd),
 		},
 	)
 
 	defer func() {
 		if err != nil {
-			w.logger.Error("处理更新订单命令失败", zap.Error(err))
+			h.logger.Error("failed", zap.Error(err))
 		} else {
-			w.logger.Info("处理更新订单命令成功")
+			h.logger.Info("success")
 		}
 	}()
 
-	return w.base.Handle(ctx, cmd)
+	return h.base.Handle(ctx, cmd)
+}
+
+
+func ApplyQueryUpdateOrderDecorators(base UpdateOrderHandler, logger *zap.Logger) UpdateOrderHandler {
+	return updateOrderHandlerLogging{
+		logger: logger,
+		base:   base,
+	}
 }

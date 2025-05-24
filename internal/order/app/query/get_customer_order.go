@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-
-	"github.com/sjxiang/oms-v2/order/domain"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/sjxiang/oms-v2/order/domain"
 )
 
 
@@ -17,39 +17,42 @@ type GetCustomerOrder struct {
 }
 
 type GetCustomerOrderHandler interface {
-	Handle(ctx context.Context, query GetCustomerOrder) (result *domain.Order, err error)
+	Handle(ctx context.Context, query GetCustomerOrder) (*domain.Order, error)
 }
 
-type GetCustomerOrderHandlerImpl struct {
+func NewGetCustomerOrderHandler(orderRepo domain.Repository, logger *zap.Logger) GetCustomerOrderHandler {
+	if orderRepo == nil {
+		panic("order repo is nil")
+	}
+
+	baseHandler := getCustomerOrderHandler{
+		orderRepo: orderRepo,
+	}
+
+	return ApplyQueryGetCustomerOrderDecorators(baseHandler, logger)
+}
+
+
+type getCustomerOrderHandler struct {
 	orderRepo domain.Repository
 }
 
-func (impl GetCustomerOrderHandlerImpl) Handle(ctx context.Context, query GetCustomerOrder) (result *domain.Order, err error) {
-	return impl.orderRepo.Get(ctx, query.OrderID, query.CustomerID)
+func (h getCustomerOrderHandler) Handle(ctx context.Context, query GetCustomerOrder) (*domain.Order, error) {
+	return h.orderRepo.Get(ctx, query.OrderID, query.CustomerID)
 }
 
-func NewCustomerOrderHandler(orderRepo domain.Repository, logger *zap.Logger) GetCustomerOrderHandler {
-	return applyQueryWrapper(
-		GetCustomerOrderHandlerImpl{
-			orderRepo: orderRepo,
-		}, logger)
-}
+// ----------------------------
+// 装饰器 logging
+// ----------------------------
 
-
-// 集成套娃
-func applyQueryWrapper(handler GetCustomerOrderHandler, logger *zap.Logger) GetCustomerOrderHandler {
-	return queryLoggingWrapper{logger: logger, base: handler}
-}
-
-
-// 套娃组件
-type queryLoggingWrapper struct {
+type getCustomerOrderHandlerLogging struct {
 	logger *zap.Logger
 	base   GetCustomerOrderHandler
 }
 
-func (w queryLoggingWrapper) Handle(ctx context.Context, cmd GetCustomerOrder) (result *domain.Order, err error) {
-	w.logger.Debug("开始处理查询", 
+func (h getCustomerOrderHandlerLogging) Handle(ctx context.Context, query GetCustomerOrder) (result *domain.Order, err error) {
+	
+	h.logger.Debug("开始处理查询", 
 		zapcore.Field{
 			Key: "query",
 			Type: zapcore.StringType,
@@ -58,16 +61,25 @@ func (w queryLoggingWrapper) Handle(ctx context.Context, cmd GetCustomerOrder) (
 		zapcore.Field{
 			Key: "query_body",
 			Type: zapcore.StringType,
-			String: fmt.Sprintf("%#v", cmd),
+			String: fmt.Sprintf("%#v", query),
 		},
 	)
+
 	defer func() {
 		if err != nil {
-			w.logger.Error("查询处理失败", zap.Error(err))
+			h.logger.Error("failed", zap.Error(err))
 		} else {
-			w.logger.Info("查询处理完成")
+			h.logger.Info("success")
 		}
 	}()
 
-	return w.base.Handle(ctx, cmd)
+	return h.base.Handle(ctx, query)
+} 
+
+
+func ApplyQueryGetCustomerOrderDecorators(base GetCustomerOrderHandler, logger *zap.Logger) GetCustomerOrderHandler {
+	return getCustomerOrderHandlerLogging{
+		logger: logger,
+		base:   base,
+	}
 }

@@ -18,8 +18,8 @@ type HTTPServer struct{
 	app app.Application
 }
 
-func NewHTTPServer(app app.Application) HTTPServer {
-	return HTTPServer{app: app}
+func NewHTTPServer(app app.Application) (HTTPServer, error) {
+	return HTTPServer{app: app}, nil 
 }
 
 
@@ -44,8 +44,8 @@ func (h HTTPServer) GetOrder(c *gin.Context) {
 
 
 	o, err := h.app.Queries.GetCustomerOrderHandler.Handle(c, query.GetCustomerOrder{
-		CustomerID: c.Param("customer_id"),   // 获取顾客编码
-		OrderID: c.Param("order_id"),         // 获取订单编码
+		CustomerID: c.Param("customer_id"),   // 获取顾客 ID
+		OrderID:    c.Param("order_id"),      // 获取订单 ID
 	})
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"error": err.Error()})

@@ -9,6 +9,5 @@ import (
 
 
 type Repository interface {
-	// CheckIfItemsInStock(ctx context.Context, req *pb.CheckIfItemsInStockRequest) (*pb.CheckIfItemsInStockResponse, error) 
 	GetItems(ctx context.Context, ids []string) ([]*pb.Item, error) 
 }

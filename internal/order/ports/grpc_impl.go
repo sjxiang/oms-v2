@@ -10,11 +10,13 @@ import (
 )
 
 type GrpcServer struct {
+	pb.UnimplementedOrderServiceServer
+	
 	app app.Application
 }
 
-func NewGrpcServer(app app.Application) *GrpcServer {
-	return &GrpcServer{app: app}
+func NewGrpcServer(app app.Application) (*GrpcServer, error) {
+	return &GrpcServer{app: app}, nil
 }
 
 func (s *GrpcServer) CreateOrder(ctx context.Context, req *pb.CreateOrderRequest) (resp *emptypb.Empty, err error) {
